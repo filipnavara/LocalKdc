@@ -13,7 +13,7 @@ public class Program
     private const short DNS_PORT = 53;
     private const short KDC_PORT = 88;
     private const short LDAP_PORT = 389;
-    private const string REALM = "contoso.com";
+    private const string REALM = "filipnavara.dev";
     private const string USERNAME = "user";
     private const string SERVICE = "test-service";
     private const string PASSWORD = "Password123";
@@ -56,6 +56,7 @@ public class Program
 
     private static async Task Server(IPAddress listener, ILoggerFactory loggerFactory)
     {
+        /*
         // This is pretty yuck but we want to try and cleanup the rule if ctrl+c
         // was pressed on the console.
         DnsClientNrptRule? nrptRule = null;
@@ -79,6 +80,7 @@ public class Program
             }
         }
         nrptRule = await DnsClientNrptRule.Create([REALM, $".{REALM}"], [listener.ToString()]);
+        */
 
         string kdcRealm = REALM.ToUpperInvariant();
         var principalService = new FakePrincipalService();
@@ -105,14 +107,14 @@ public class Program
             principalService,
             loggerFactory);
 
-        using DnsServer dnsServer = new(
+        /*using DnsServer dnsServer = new(
             listener,
             DNS_PORT,
             REALM,
             loggerFactory);
         dnsServer.AddARecord($"dc01.{REALM}", listener);
         dnsServer.AddSRVRecord($"_ldap._tcp.dc._msdcs.{REALM}", $"dc01.{REALM}", KDC_PORT);
-        dnsServer.AddSRVRecord($"_kerberos._tcp.dc._msdcs.{REALM}", $"dc01.{REALM}", KDC_PORT);
+        dnsServer.AddSRVRecord($"_kerberos._tcp.dc._msdcs.{REALM}", $"dc01.{REALM}", KDC_PORT);*/
 
         using LdapServer ldapServer = new(listener, LDAP_PORT, loggerFactory);
         ldapServer.AddNetlogonResponse(REALM,
@@ -138,7 +140,7 @@ public class Program
                 Lm20Token: -1));
 
         kdcServer.Start();
-        dnsServer.Start();
+        //dnsServer.Start();
         ldapServer.Start();
         await Task.Delay(-1);
     }
